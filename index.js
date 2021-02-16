@@ -1,8 +1,25 @@
-const Joi = require('joi');
-const express = require('express');
+const Joi = require('joi');    // npm i joi
+const express = require('express');  // npm install express  : Most used library for building server side rest API
 const app = express();
 
+// setting port locally as a localhost http://localhost:3000
 
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Listening on port ${port}...`));
+
+// display helloworld at root http://localhost:3000/ in browser
+
+app.get('/', (req, res) => {
+    res.send('Hello World !!!');
+});
+
+// send data at port http://localhost:3000/api/posts/2020/02 and display at browser.
+
+app.get('/api/posts/:year/:month', (req, res) => {
+    res.send(req.params);
+});
+
+// small Data set created for applying CRUD properties...
 
 app.use(express.json());
 const courses = [
@@ -10,6 +27,22 @@ const courses = [
     {id: 2, name: 'course2'},
     {id: 3, name: 'course3'},
 ];
+
+// get all coursse of dataset at: http://localhoast3000/api/courses/
+
+app.get('/api/courses', (req, res) => {
+    res.send(courses);
+});
+
+// get course by course id in dataset at: http://localhoast3000/api/courses/:id.
+
+app.get('/api/courses/:id', (req, res) => {
+    const course = courses.find(c => c.id === parseInt(req.params.id));
+    if(!course) return res.status(404).send('this course is not found');
+    res.send(course);
+});
+
+// post the data to dataset at http://localhoast3000/api/courses/
 
 app.post('/api/courses', (req, res) => {
     const { error } = validateCourse(req.body);
@@ -23,32 +56,12 @@ app.post('/api/courses', (req, res) => {
     res.send(course);
   });
 
-app.get('/api/courses', (req, res) => {
-    res.send(courses);
-});
-
-
-
-app.get('/', (req, res) => {
-    res.send('Hello World !!!');
-});
-
-app.get('/api/courses/:id', (req, res) => {
-    const course = courses.find(c => c.id === parseInt(req.params.id));
-    if(!course) return res.status(404).send('this course is not found');
-    res.send(course);
-});
-
-app.get('/api/posts/:year/:month', (req, res) => {
-    res.send(req.params);
-});
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Listening on port ${port}...`));
+// Update a course from data set with id shared at http://localhost/3000/api/courses/:id
 
 app.put('/api/courses/:id', (req, res) => {
     // Look up the course
     // If not existing, return 404
+
     const course = courses.find(c => c.id === parseInt(req.params.id));
     if(!course) return res.status(404).send('this course is not found');
    
@@ -58,8 +71,6 @@ app.put('/api/courses/:id', (req, res) => {
     
     const { error } = validateCourse(req.body);
     if(error) return res.status(400).send(error.details[0].message);
-       
-
 
     // update course
     course.name = req.body.name;
@@ -67,6 +78,8 @@ app.put('/api/courses/:id', (req, res) => {
     // Return the updated course
 
 });
+
+// Validate function to simplyify logic
 
 function validateCourse(course){
     const schema = {
@@ -76,6 +89,7 @@ function validateCourse(course){
     return Joi.validate(course, schema);
 }
 
+// Delete a course from data set with id shared at http://localhost/3000/api/courses/:id
 
 app.delete('/api/courses/:id', (req, res) => {
     //look up for the course
